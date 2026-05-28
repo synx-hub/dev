@@ -2,14 +2,54 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 
+-- Safely fetch LocalPlayer (yields until it exists to prevent 'nil' errors)
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+if not player then
+    Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+    player = Players.LocalPlayer
+end
+
+-- Safely fetch PlayerGui
+local playerGui = player:WaitForChild("PlayerGui", 10)
+if not playerGui then
+    warn("SyntaxUI Error: PlayerGui not found in time.")
+    return
+end
 
 -- LINKS
 local DISCORD_LINK = "https://discord.gg/FQSpUwaey6"
 local YOUTUBE_LINK = "https://youtube.com/@syntax-giver?si=_KwmTDFssn6QEM6B"
 
--- GUI
+--==================================================
+-- SAFE COPY FUNCTION
+--==================================================
+local function CopyText(text)
+    local success = false
+    pcall(function()
+        -- Direct assignment checks to prevent global environment errors
+        local setclip = move_to_top or setclipboard or toclipboard or (Clipboard and Clipboard.set)
+        if setclipboard then
+            setclipboard(text)
+            success = true
+        elseif toclipboard then
+            toclipboard(text)
+            success = true
+        elseif Clipboard and Clipboard.set then
+            Clipboard.set(text)
+            success = true
+        end
+    end)
+    return success
+end
+
+--==================================================
+-- GUI INITIALIZATION
+--==================================================
+
+-- Clean up any existing instances of this UI to prevent duplication overlapping
+local existingUI = playerGui:FindFirstChild("SyntaxUnlockUI")
+if existingUI then existingUI:Destroy() end
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SyntaxUnlockUI"
 ScreenGui.ResetOnSpawn = false
@@ -17,187 +57,190 @@ ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder = 999
 ScreenGui.Parent = playerGui
 
--- BLUR
+-- LOCAL BLUR (Created in Camera to ensure it only affects THIS player)
+local camera = workspace.CurrentCamera or workspace:WaitForChild("Camera")
 local Blur = Instance.new("BlurEffect")
+Blur.Name = "SyntaxUIBlur"
 Blur.Size = 0
-Blur.Parent = Lighting
+Blur.Parent = camera
 
--- BACKDROP
+-- BACKGROUND
 local Backdrop = Instance.new("Frame")
-Backdrop.Size = UDim2.new(1,0,1,0)
-Backdrop.BackgroundColor3 = Color3.fromRGB(5,5,15)
+Backdrop.Size = UDim2.new(1, 0, 1, 0)
+Backdrop.BackgroundColor3 = Color3.fromRGB(5, 5, 15)
 Backdrop.BackgroundTransparency = 1
-Backdrop.ZIndex = 1
+Backdrop.BorderSizePixel = 0
 Backdrop.Parent = ScreenGui
 
 -- MAIN CARD
 local Card = Instance.new("Frame")
-Card.Size = UDim2.new(0,330,0,350)
-Card.Position = UDim2.new(0.5,-165,0.5,-175)
-Card.BackgroundColor3 = Color3.fromRGB(88,101,242)
-Card.BackgroundTransparency = 1
+Card.Size = UDim2.new(0, 320, 0, 340)
+Card.Position = UDim2.new(0.5, -160, 0.5, -170)
+Card.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+Card.BackgroundTransparency = 1 -- Animate this dynamically
 Card.BorderSizePixel = 0
-Card.ZIndex = 2
 Card.Parent = ScreenGui
 
-Instance.new("UICorner", Card).CornerRadius = UDim.new(0,22)
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 20)
+Corner.Parent = Card
 
 local Gradient = Instance.new("UIGradient")
 Gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(88,101,242)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(45,50,120))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(88, 101, 242)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 50, 120))
 })
 Gradient.Rotation = 135
 Gradient.Parent = Card
 
 local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.fromRGB(255,255,255)
-Stroke.Thickness = 1.5
+Stroke.Color = Color3.fromRGB(255, 255, 255)
+Stroke.Thickness = 1.2
 Stroke.Transparency = 0.7
 Stroke.Parent = Card
 
 -- TITLE
 local Title = Instance.new("TextLabel")
-Title.Text = "Subscribe & Join to Unlock"
-Title.Size = UDim2.new(1,0,0,35)
-Title.Position = UDim2.new(0,0,0,28)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Position = UDim2.new(0, 0, 0, 25)
 Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Text = "Subscribe & Join to Unlock"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 22
-Title.ZIndex = 5
+Title.TextSize = 21
 Title.Parent = Card
 
--- SUBTEXT
-local Sub = Instance.new("TextLabel")
-Sub.Text = "Subscribe to our YouTube channel and join the Discord server to unlock the script instantly!"
-Sub.Size = UDim2.new(1,-40,0,55)
-Sub.Position = UDim2.new(0,20,0,78)
-Sub.BackgroundTransparency = 1
-Sub.TextColor3 = Color3.fromRGB(220,230,255)
-Sub.Font = Enum.Font.Gotham
-Sub.TextSize = 13
-Sub.TextWrapped = true
-Sub.ZIndex = 5
-Sub.Parent = Card
+-- DESCRIPTION
+local Desc = Instance.new("TextLabel")
+Desc.Size = UDim2.new(1, -40, 0, 50)
+Desc.Position = UDim2.new(0, 20, 0, 72)
+Desc.BackgroundTransparency = 1
+Desc.TextWrapped = true
+Desc.Text = "Subscribe to our YouTube channel and join the Discord server to unlock instantly."
+Desc.TextColor3 = Color3.fromRGB(225, 230, 255)
+Desc.Font = Enum.Font.Gotham
+Desc.TextSize = 13
+Desc.Parent = Card
 
 -- STEPS
 local steps = {
-    "💬  Copy Discord invite",
-    "📺  Copy YouTube channel",
-    "✅  Join & Subscribe",
-    "🚀  Unlock instantly"
+    "💬 Copy Discord invite",
+    "📺 Copy YouTube link",
+    "✅ Join & Subscribe",
+    "🚀 Unlock instantly"
 }
 
-for i, text in ipairs(steps) do
-    local Label = Instance.new("TextLabel")
-    Label.Name = "Step"..i
-    Label.Size = UDim2.new(1,-40,0,22)
-    Label.Position = UDim2.new(0,25,0,145 + ((i-1) * 28))
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(255,255,255)
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextSize = 13
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.ZIndex = 5
-    Label.Parent = Card
+for i, v in ipairs(steps) do
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -40, 0, 20)
+    lbl.Position = UDim2.new(0, 25, 0, 135 + ((i - 1) * 26))
+    lbl.BackgroundTransparency = 1
+    lbl.Text = v
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.TextSize = 13
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = Card
 end
 
--- BUTTON STATES
+-- STATES
 local discordDone = false
 local youtubeDone = false
 
-local function UnlockScript()
-    TweenService:Create(Card, TweenInfo.new(0.45, Enum.EasingStyle.BackIn), {
-        Position = UDim2.new(0.5,-165,1.5,0),
+-- UNLOCK FUNCTION
+local function Unlock()
+    -- Smooth exit animations
+    TweenService:Create(Card, TweenInfo.new(0.4, Enum.EasingStyle.BackIn), {
+        Position = UDim2.new(0.5, -160, 1.5, 0)
+    }):Play()
+
+    TweenService:Create(Backdrop, TweenInfo.new(0.4), {
         BackgroundTransparency = 1
     }):Play()
 
-    TweenService:Create(Backdrop, TweenInfo.new(0.45), {
-        BackgroundTransparency = 1
-    }):Play()
-
-    TweenService:Create(Blur, TweenInfo.new(0.45), {
+    TweenService:Create(Blur, TweenInfo.new(0.4), {
         Size = 0
     }):Play()
 
     task.wait(0.45)
 
+    -- Complete cleanup
+    Blur:Destroy()
     ScreenGui:Destroy()
 
-    if Blur then
-        Blur:Destroy()
+    -- Safely run the target script payload
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://pastefy.app/VeetMWsS/raw"))()
+    end)
+    
+    if not success then
+        warn("SyntaxUI Error executing loadstring script: ", err)
     end
 end
 
 local function CheckUnlock()
     if discordDone and youtubeDone then
-        task.wait(1)
-        UnlockScript()
+        task.wait(0.6)
+        Unlock()
     end
 end
 
 -- DISCORD BUTTON
 local DiscordBtn = Instance.new("TextButton")
+DiscordBtn.Size = UDim2.new(0.8, 0, 0, 40)
+DiscordBtn.Position = UDim2.new(0.1, 0, 0, 245)
+DiscordBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 DiscordBtn.Text = "Copy Discord Invite"
-DiscordBtn.Size = UDim2.new(0.8,0,0,42)
-DiscordBtn.Position = UDim2.new(0.1,0,0,255)
-DiscordBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-DiscordBtn.TextColor3 = Color3.fromRGB(88,101,242)
+DiscordBtn.TextColor3 = Color3.fromRGB(88, 101, 242)
 DiscordBtn.Font = Enum.Font.GothamBold
 DiscordBtn.TextSize = 14
-DiscordBtn.ZIndex = 5
 DiscordBtn.Parent = Card
 
-Instance.new("UICorner", DiscordBtn).CornerRadius = UDim.new(0,12)
+local DiscordCorner = Instance.new("UICorner")
+DiscordCorner.CornerRadius = UDim.new(0, 12)
+DiscordCorner.Parent = DiscordBtn
 
 DiscordBtn.MouseButton1Click:Connect(function()
-    if setclipboard then
-        setclipboard(DISCORD_LINK)
+    if discordDone then return end -- Prevent clicking twice
+    CopyText(DISCORD_LINK)
+    discordDone = true
 
-        discordDone = true
+    DiscordBtn.Text = "Discord Copied ✅"
+    DiscordBtn.BackgroundColor3 = Color3.fromRGB(67, 181, 129)
+    DiscordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-        DiscordBtn.Text = "Discord Copied ✅"
-        DiscordBtn.BackgroundColor3 = Color3.fromRGB(67,181,129)
-        DiscordBtn.TextColor3 = Color3.fromRGB(255,255,255)
-
-        CheckUnlock()
-    else
-        DiscordBtn.Text = "Clipboard Unsupported"
-    end
+    CheckUnlock()
 end)
 
 -- YOUTUBE BUTTON
 local YoutubeBtn = Instance.new("TextButton")
+YoutubeBtn.Size = UDim2.new(0.8, 0, 0, 40)
+YoutubeBtn.Position = UDim2.new(0.1, 0, 0, 292)
+YoutubeBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 YoutubeBtn.Text = "Copy YouTube Link"
-YoutubeBtn.Size = UDim2.new(0.8,0,0,42)
-YoutubeBtn.Position = UDim2.new(0.1,0,0,305)
-YoutubeBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
-YoutubeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+YoutubeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 YoutubeBtn.Font = Enum.Font.GothamBold
 YoutubeBtn.TextSize = 14
-YoutubeBtn.ZIndex = 5
 YoutubeBtn.Parent = Card
 
-Instance.new("UICorner", YoutubeBtn).CornerRadius = UDim.new(0,12)
+local YoutubeCorner = Instance.new("UICorner")
+YoutubeCorner.CornerRadius = UDim.new(0, 12)
+YoutubeCorner.Parent = YoutubeBtn
 
 YoutubeBtn.MouseButton1Click:Connect(function()
-    if setclipboard then
-        setclipboard(YOUTUBE_LINK)
+    if youtubeDone then return end -- Prevent clicking twice
+    CopyText(YOUTUBE_LINK)
+    youtubeDone = true
 
-        youtubeDone = true
+    YoutubeBtn.Text = "YouTube Copied ✅"
+    YoutubeBtn.BackgroundColor3 = Color3.fromRGB(67, 181, 129)
 
-        YoutubeBtn.Text = "YouTube Copied ✅"
-        YoutubeBtn.BackgroundColor3 = Color3.fromRGB(67,181,129)
-
-        CheckUnlock()
-    else
-        YoutubeBtn.Text = "Clipboard Unsupported"
-    end
+    CheckUnlock()
 end)
 
--- ENTRANCE ANIMATION
+--==================================================
+-- ENTRANCE ANIMATIONS
+--==================================================
 TweenService:Create(Backdrop, TweenInfo.new(0.5), {
     BackgroundTransparency = 0.45
 }):Play()
