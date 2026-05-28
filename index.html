@@ -1,1 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SyntaxScript</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+
+  <style>
+
+    *, *::before, *::after{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    :root{
+      --bg:#0d0610;
+      --surface:#130d1e;
+      --surface2:#1a1028;
+      --accent:#b44fff;
+      --accent2:#d97cff;
+      --pink:#ff4ecd;
+      --soft:#e8b4ff;
+      --text:#f0e6ff;
+      --muted:#7a5a99;
+      --border:#2a1545;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Share Tech Mono', monospace;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:'';
+      position:fixed;
+      inset:0;
+
+      background-image:
+      linear-gradient(rgba(180,79,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(180,79,255,.04) 1px, transparent 1px);
+
+      background-size:40px 40px;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    body::after{
+      content:'';
+      position:fixed;
+      inset:0;
+
+      background:
+      radial-gradient(ellipse at 15% 20%, rgba(180,79,255,.14) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 75%, rgba(255,78,205,.10) 0%, transparent 50%);
+
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .container{
+      position:relative;
+      z-index:1;
+      max-width:850px;
+      margin:auto;
+      padding:40px 18px 100px;
+    }
+
+    header{
+      text-align:center;
+      margin-bottom:50px;
+
+      background:
+      linear-gradient(
+      135deg,
+      rgba(26,16,40,.95),
+      rgba(40,16,60,.8));
+
+      border:1px solid rgba(180,79,255,.28);
+
+      border-radius:18px;
+      padding:35px 25px 30px;
+
+      box-shadow:
+      0 0 60px rgba(180,79,255,.12),
+      inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .logo{
+      font-family:'Orbitron',sans-serif;
+      font-weight:900;
+      font-size:clamp(2rem,6vw,3.4rem);
+
+      background:
+      linear-gradient(
+      135deg,
+      #d97cff 0%,
+      #b44fff 45%,
+      #ff4ecd 100%);
+
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+
+      filter:drop-shadow(0 0 22px rgba(180,79,255,.55));
+    }
+
+    .tagline{
+      margin-top:8px;
+      font-size:.8rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--soft);
+      opacity:.85;
+    }
+
+    .yt-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+
+      margin-top:14px;
+      padding:7px 15px;
+
+      background:rgba(255,78,205,.1);
+      border:1px solid rgba(255,78,205,.3);
+
+      border-radius:100px;
+
+      font-size:.72rem;
+      letter-spacing:.1em;
+      color:#ff85df;
+    }
+
+    .yt-icon{
+      width:14px;
+      height:14px;
+      fill:#ff4ecd;
+    }
+
+    .divider{
+      width:100%;
+      height:1px;
+
+      background:
+      linear-gradient(
+      90deg,
+      transparent,
+      var(--accent),
+      var(--pink),
+      transparent);
+
+      opacity:.45;
+      margin-bottom:40px;
+    }
+
+    .script-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+
+      border-radius:15px;
+      overflow:hidden;
+
+      margin-bottom:24px;
+
+      box-shadow:
+      0 0 40px rgba(180,79,255,.06),
+      0 8px 32px rgba(0,0,0,.5);
+
+      transition:.3s;
+    }
+
+    .script-card:hover{
+      border-color:rgba(180,79,255,.45);
+
+      box-shadow:
+      0 0 50px rgba(180,79,255,.16),
+      0 8px 32px rgba(0,0,0,.5);
+    }
+
+    .card-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+
+      padding:14px 18px;
+
+      background:var(--surface2);
+      border-bottom:1px solid var(--border);
+    }
+
+    .script-name{
+      font-family:'Orbitron',sans-serif;
+      font-size:.75rem;
+      font-weight:700;
+
+      letter-spacing:.1em;
+      text-transform:uppercase;
+
+      color:var(--accent2);
+    }
+
+    .badge{
+      font-size:.64rem;
+      padding:4px 12px;
+
+      border-radius:100px;
+
+      background:rgba(255,78,205,.12);
+      border:1px solid rgba(255,78,205,.4);
+
+      color:#ff85df;
+
+      letter-spacing:.08em;
+      font-family:'Orbitron',sans-serif;
+      font-weight:700;
+    }
+
+    .script-body{
+      padding:22px 20px;
+
+      font-size:.83rem;
+      line-height:1.8;
+
+      color:#d4a8f2;
+
+      white-space:pre-wrap;
+      word-break:break-all;
+
+      border-left:3px solid rgba(180,79,255,.35);
+
+      min-height:75px;
+      user-select:all;
+    }
+
+    .card-bottom{
+      padding:14px 18px;
+
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .script-info{
+      font-size:.67rem;
+      color:var(--muted);
+      letter-spacing:.05em;
+    }
+
+    .copy-btn{
+      font-family:'Orbitron',sans-serif;
+      font-weight:700;
+      font-size:.7rem;
+
+      letter-spacing:.1em;
+      text-transform:uppercase;
+
+      padding:12px 22px;
+      min-width:185px;
+
+      border-radius:10px;
+      border:1px solid var(--accent);
+
+      background:
+      linear-gradient(
+      135deg,
+      rgba(180,79,255,.18),
+      rgba(180,79,255,.06));
+
+      color:var(--accent2);
+
+      cursor:pointer;
+      transition:.25s;
+    }
+
+    .copy-btn:hover{
+      background:
+      linear-gradient(
+      135deg,
+      rgba(180,79,255,.38),
+      rgba(180,79,255,.18));
+
+      box-shadow:0 0 22px rgba(180,79,255,.45);
+
+      color:#fff;
+    }
+
+    .copy-btn.copied{
+      border-color:#d97cff;
+
+      background:
+      linear-gradient(
+      135deg,
+      rgba(180,79,255,.45),
+      rgba(255,78,205,.25));
+
+      color:#fff;
+    }
+
+    .social-links{
+      margin-top:40px;
+
+      display:flex;
+      flex-wrap:wrap;
+      gap:15px;
+
+      justify-content:center;
+    }
+
+    .social-btn{
+      display:flex;
+      align-items:center;
+      gap:10px;
+
+      padding:14px 20px;
+
+      border-radius:14px;
+
+      text-decoration:none;
+
+      font-family:'Orbitron',sans-serif;
+      font-size:.75rem;
+      font-weight:700;
+      letter-spacing:.08em;
+
+      transition:.25s;
+
+      border:1px solid rgba(180,79,255,.25);
+
+      background:
+      linear-gradient(
+      135deg,
+      rgba(180,79,255,.14),
+      rgba(255,78,205,.08));
+
+      color:#fff;
+
+      min-width:180px;
+      justify-content:center;
+    }
+
+    .social-btn:hover{
+      transform:translateY(-3px);
+
+      box-shadow:
+      0 0 24px rgba(180,79,255,.35);
+
+      border-color:rgba(255,78,205,.45);
+    }
+
+    .social-icon{
+      width:18px;
+      height:18px;
+    }
+
+    .discord:hover{
+      color:#8ea1ff;
+    }
+
+    .tiktok:hover{
+      color:#ff7ad9;
+    }
+
+    .youtube:hover{
+      color:#ff5a7d;
+    }
+
+    .toast{
+      position:fixed;
+      bottom:30px;
+      left:50%;
+
+      transform:translateX(-50%) translateY(16px);
+
+      background:
+      linear-gradient(135deg,#b44fff,#ff4ecd);
+
+      color:#fff;
+
+      font-family:'Orbitron',sans-serif;
+      font-size:.72rem;
+      font-weight:700;
+      letter-spacing:.1em;
+
+      padding:12px 30px;
+
+      border-radius:100px;
+
+      opacity:0;
+      transition:.25s;
+
+      pointer-events:none;
+      z-index:999;
+
+      box-shadow:0 0 32px rgba(180,79,255,.55);
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    footer{
+      text-align:center;
+      margin-top:60px;
+
+      font-size:.7rem;
+      color:var(--muted);
+
+      letter-spacing:.1em;
+    }
+
+    footer a{
+      color:var(--accent);
+      text-decoration:none;
+    }
+
+    @media(max-width:600px){
+
+      .copy-btn{
+        width:100%;
+      }
+
+      .card-bottom{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .script-body{
+        font-size:.78rem;
+      }
+
+      .script-name{
+        font-size:.64rem;
+      }
+
+      .social-btn{
+        width:100%;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <header>
+
+    <div class="logo">
+      SyntaxScript
+    </div>
+
+    <div class="tagline">
+      Trusted by 10,000+ Players Daily!
+    </div>
+
+    <div class="yt-badge">
+
+      <svg class="yt-icon" viewBox="0 0 24 24">
+        <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1C4.5 20.5 12 20.5 12 20.5s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.8 15.5V8.5l6.2 3.5-6.2 3.5z"/>
+      </svg>
+
+      YT: syntax-giver
+    </div>
+
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- ADOPT ME -->
+  <div class="script-card">
+
+    <div class="card-top">
+      <span class="script-name">⚡ Adopt Me Script</span>
+      <span class="badge">PREMIUM</span>
+    </div>
+
+    <div class="script-body" id="script1">
+loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/adopt-me"))()
+    </div>
+
+    <div class="card-bottom">
+
+      <span class="script-info">
+        // Paste into your executor
+      </span>
+
+      <button class="copy-btn" onclick="copyScript('script1', this)">
+        ⧉ Copy Script
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- MM2 -->
+  <div class="script-card">
+
+    <div class="card-top">
+      <span class="script-name">⚡ MM2 Script</span>
+      <span class="badge">PREMIUM</span>
+    </div>
+
+    <div class="script-body" id="script2">
+loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/Overdrive-H/refs/heads/main/Loader.Lua"))()
+    </div>
+
+    <div class="card-bottom">
+
+      <span class="script-info">
+        // Paste into your executor
+      </span>
+
+      <button class="copy-btn" onclick="copyScript('script2', this)">
+        ⧉ Copy Script
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- STEAL A BRAINROT -->
+  <div class="script-card">
+
+    <div class="card-top">
+      <span class="script-name">⚡ Steal A Brainrot Script</span>
+      <span class="badge">PREMIUM</span>
+    </div>
+
+    <div class="script-body" id="script3">
+loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/sab"))()
+    </div>
+
+    <div class="card-bottom">
+
+      <span class="script-info">
+        // Paste into your executor
+      </span>
+
+      <button class="copy-btn" onclick="copyScript('script3', this)">
+        ⧉ Copy Script
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SOCIAL LINKS -->
+  <div class="social-links">
+
+    <!-- DISCORD -->
+    <a href="https://discord.gg/PcNRpWNZVS"
+       target="_blank"
+       class="social-btn discord">
+
+      <svg viewBox="0 0 24 24" class="social-icon">
+        <path fill="currentColor"
+        d="M20.317 4.369A19.791 19.791 0 0 0 15.885 3c-.191.328-.403.775-.554 1.124a18.27 18.27 0 0 0-5.658 0A12.64 12.64 0 0 0 9.12 3a19.736 19.736 0 0 0-4.433 1.369C1.9 8.583 1.147 12.692 1.5 16.743a19.9 19.9 0 0 0 5.993 3.028c.484-.665.915-1.369 1.286-2.111z"/>
+      </svg>
+
+      Discord Server
+    </a>
+
+    <!-- TIKTOK -->
+    <a href="https://www.tiktok.com/@kiyoshi3201?_r=1&_t=ZS-96jSGbIV81i"
+       target="_blank"
+       class="social-btn tiktok">
+
+      <svg viewBox="0 0 24 24" class="social-icon">
+        <path fill="currentColor"
+        d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.719h-3.551v13.907a2.839 2.839 0 1 1-2.84-2.839z"/>
+      </svg>
+
+      TikTok
+    </a>
+
+    <!-- YOUTUBE -->
+    <a href="https://youtube.com/@syntax-giver?si=QI5kxNyJuR6r-YQ4"
+       target="_blank"
+       class="social-btn youtube">
+
+      <svg viewBox="0 0 24 24" class="social-icon">
+        <path fill="currentColor"
+        d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2z"/>
+      </svg>
+
+      YouTube
+    </a>
+
+  </div>
+
+  <footer>
+    © 2026 SyntaxScript ·
+    <a href="https://youtube.com/@syntax-giver" target="_blank">
+      syntax-giver
+    </a>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast">
+  ✓ Script Copied!
+</div>
+
+<script>
+
+function copyScript(id, btn){
+
+  const text =
+  document.getElementById(id).innerText;
+
+  navigator.clipboard.writeText(text).then(() => {
+
+    const original = btn.innerHTML;
+
+    btn.innerHTML = '✓ Copied!';
+    btn.classList.add('copied');
+
+    setTimeout(() => {
+
+      btn.innerHTML = original;
+      btn.classList.remove('copied');
+
+    }, 2200);
+
+    const toast =
+    document.getElementById('toast');
+
+    toast.classList.add('show');
+
+    setTimeout(() => {
+
+      toast.classList.remove('show');
+
+    }, 2200);
+
+  });
+
+}
+
+</script>
+
+</body>
+  </html>
