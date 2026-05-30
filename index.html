@@ -7,69 +7,54 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <style>
     :root{ --bg:#050a14; --accent:#00e1ff; --text:#e0f7ff; --success:#bc13fe; --warn:#ffcc00; }
-    body{ background:var(--bg); color:var(--text); font-family:'Share Tech Mono', monospace; padding:15px; margin:0; }
-    .container{ max-width:900px; margin:auto; width:100%; box-sizing:border-box; }
+    body{ background:var(--bg); color:var(--text); font-family:'Share Tech Mono', monospace; padding:10px; margin:0; }
+    .container{ max-width:1000px; margin:auto; }
     
-    .announcement { background:rgba(255,204,0,0.05); border:1px solid var(--warn); padding:10px; border-radius:10px; margin-bottom:20px; text-align:center; font-size:0.9rem; color:var(--warn); }
-    .search-box { width:100%; padding:12px; margin-bottom:20px; background:#000; border:1px solid var(--accent); color:white; border-radius:10px; box-sizing:border-box; }
+    .announcement { background:rgba(255,204,0,0.05); border:1px solid var(--warn); padding:8px; border-radius:8px; margin-bottom:15px; text-align:center; font-size:0.8rem; color:var(--warn); }
+    .search-box { width:100%; padding:10px; margin-bottom:15px; background:#000; border:1px solid var(--accent); color:white; border-radius:8px; box-sizing:border-box; }
     
-    .dashboard-container { background:rgba(0,225,255,0.05); border:1px solid var(--accent); padding:20px; border-radius:15px; margin-bottom:20px; }
-    .dashboard-title { font-family:Orbitron; color:var(--accent); margin-bottom:15px; font-weight:bold; text-align:center; }
+    .dashboard-container { background:rgba(0,225,255,0.05); border:1px solid var(--accent); padding:15px; border-radius:12px; margin-bottom:15px; }
+    .dashboard-title { font-family:Orbitron; color:var(--accent); margin-bottom:10px; font-size:0.9rem; font-weight:bold; text-align:center; }
     
-    /* Grid layout ensures everything shows regardless of number of scripts */
-    .stats-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:10px; }
-    .stat-item { background:rgba(0,0,0,0.3); padding:8px; border-radius:8px; text-align:center; border:1px solid #222; font-size: 0.8rem; }
-    .stat-val { font-size:1rem; color:var(--accent); font-weight:bold; margin-top:2px; }
+    /* Flex-wrap ensures all 5+ items fit regardless of screen size */
+    .stats-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+    .stat-item { background:rgba(0,0,0,0.5); padding:6px 10px; border-radius:6px; text-align:center; border:1px solid #222; font-size:0.7rem; flex: 1 1 80px; }
+    .stat-val { font-size:0.9rem; color:var(--accent); font-weight:bold; display:block; }
     
-    .status-box { margin-top:15px; padding:8px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:8px; font-size:0.75rem; color:#aaa; text-align:center; }
+    .status-box { margin-top:10px; padding:6px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:6px; font-size:0.7rem; text-align:center; }
 
-    .header-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-    .script-card{ background:rgba(13,22,38,0.8); border:1px solid var(--accent); padding:15px; border-radius:15px; margin-bottom:15px; position:relative; }
-    .script-body{ background:#000; padding:8px; border-radius:8px; font-size:0.75rem; color:var(--accent); border-left:3px solid var(--accent); margin:10px 0; word-break: break-all; }
-    .main-btn { padding:8px 15px; background:transparent; border:1px solid var(--accent); color:var(--accent); cursor:pointer; width:100%; font-family:Orbitron; border-radius:5px; }
-    .main-btn:hover { background:var(--accent); color:#000; }
+    .header-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+    .script-card{ background:rgba(13,22,38,0.8); border:1px solid var(--accent); padding:15px; border-radius:12px; margin-bottom:15px; position:relative; }
+    .script-body{ background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:var(--accent); border-left:3px solid var(--accent); margin:10px 0; word-break:break-all; }
+    .main-btn { padding:8px 12px; background:transparent; border:1px solid var(--accent); color:var(--accent); cursor:pointer; width:100%; font-family:Orbitron; border-radius:5px; font-size:0.8rem; }
     
-    .del-btn { position:absolute; top:10px; right:10px; background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size:1.2rem; }
-    
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center; padding:10px; box-sizing:border-box; overflow-y:auto; }
-    .modal-content { background:#0a0a0c; padding:20px; border:1px solid var(--accent); border-radius:15px; width:100%; max-width:400px; box-sizing:border-box; }
-    
-    .input-wrapper { position: relative; width: 100%; }
-    input { width:100%; padding:10px; margin:5px 0 10px 0; background:#000; border:1px solid #333; color:white; border-radius:5px; box-sizing:border-box; }
-    .toggle-pass { position: absolute; right: 10px; top: 12px; cursor: pointer; color: var(--accent); font-size: 0.7rem; }
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:9999; justify-content:center; align-items:center; padding:10px; box-sizing:border-box; }
+    .modal-content { background:#0a0a0c; padding:20px; border:1px solid var(--accent); border-radius:12px; width:100%; max-width:350px; }
+    input { width:100%; padding:10px; margin:5px 0 10px 0; background:#000; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="announcement" id="announcementText">📢 Loading...</div>
-
   <div class="header-row">
-    <h1 style="font-family:Orbitron; color:var(--accent); margin:0;">SYNTAX HUB</h1>
+    <h1 style="font-family:Orbitron; color:var(--accent); font-size:1.5rem; margin:0;">SYNTAX HUB</h1>
     <button class="main-btn" style="width:auto" onclick="openModal('password')">ADMIN</button>
   </div>
-
   <input type="text" class="search-box" id="searchBar" placeholder="🔍 Search scripts..." onkeyup="render()">
-
   <div class="dashboard-container">
     <div class="dashboard-title">Usage Dashboard</div>
     <div class="stats-grid" id="dashboard-stats"></div>
-    <div class="status-box">Script Status: <span style="color:#00ff88">● Undetected</span> | Version: 2.4.0</div>
+    <div class="status-box">Status: ● Undetected | Ver: 2.4.0</div>
   </div>
-
   <div id="scripts-container"></div>
 </div>
 
-<div id="unifiedModal" class="modal">
-  <div class="modal-content" id="modalBody"></div>
-</div>
+<div id="unifiedModal" class="modal"><div class="modal-content" id="modalBody"></div></div>
 
 <script>
-  const STORAGE_KEY = "syntaxData_FINAL_v17";
   const PASSWORD = "syntax2011";
-  
-  // Starting with 5 scripts as requested
-  let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+  let data = JSON.parse(localStorage.getItem("syntaxData_FINAL_v17")) || {
     announcement: "Welcome to Syntax Hub - Elite Scripts",
     scripts: [
       {name: 'Adopt Me', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/adopt-me"))()', count: 0},
@@ -85,48 +70,33 @@
     const container = document.getElementById('scripts-container');
     const dash = document.getElementById('dashboard-stats');
     document.getElementById('announcementText').innerText = data.announcement;
-    container.innerHTML = '';
-    dash.innerHTML = '';
+    container.innerHTML = ''; dash.innerHTML = '';
     
     data.scripts.forEach((s, i) => {
-      dash.innerHTML += `<div class="stat-item"><div>${s.name}:</div><div class="stat-val">${s.count}</div></div>`;
+      dash.innerHTML += `<div class="stat-item">${s.name}<span class="stat-val">${s.count}</span></div>`;
       if (s.name.toLowerCase().includes(filter)) {
-        container.innerHTML += `
-          <div class="script-card">
-            <button class="del-btn" onclick="openModal('delete', ${i})">✕</button>
-            <div style="font-family:Orbitron; font-weight:bold;">⚡ ${s.name}</div>
-            <div class="script-body">${s.code}</div>
-            <button class="main-btn" id="btn-${i}" onclick="copyScript(${i})">COPY SCRIPT</button>
-          </div>`;
+        container.innerHTML += `<div class="script-card"><div style="font-family:Orbitron; font-weight:bold;">⚡ ${s.name}</div><div class="script-body">${s.code}</div><button class="main-btn" onclick="copyScript(${i})">COPY SCRIPT</button></div>`;
       }
     });
   }
 
-  function toggleVisibility(id) {
-    const input = document.getElementById(id);
-    const btn = event.target;
-    if (input.type === "password") { input.type = "text"; btn.innerText = "HIDE"; } 
-    else { input.type = "password"; btn.innerText = "SHOW"; }
+  function openModal(type) {
+    const b = document.getElementById('modalBody');
+    document.getElementById('unifiedModal').style.display = 'flex';
+    b.innerHTML = `<h3>${type.toUpperCase()}</h3><input type="password" id="p" placeholder="Password"><button class="main-btn" onclick="check('${type}')">ENTER</button><button class="main-btn" onclick="document.getElementById('unifiedModal').style.display='none'">CLOSE</button>`;
   }
 
-  function openModal(type, index) {
-    const modal = document.getElementById('unifiedModal');
-    const body = document.getElementById('modalBody');
-    modal.style.display = 'flex';
-    if (type === 'password') {
-      body.innerHTML = `<h3>ADMIN</h3><div class="input-wrapper"><input type="password" id="passCheck" placeholder="Password..."><span class="toggle-pass" onclick="toggleVisibility('passCheck')">SHOW</span></div><button class="main-btn" onclick="checkPassword()">ENTER</button><button class="main-btn" onclick="closeModal()">CLOSE</button>`;
-    } else if (type === 'admin') {
-      body.innerHTML = `<h3>ADMIN PANEL</h3><input type="text" id="annInput" placeholder="New Announcement"><input type="text" id="nInput" placeholder="Name"><input type="text" id="cInput" placeholder="Loadstring"><button class="main-btn" onclick="saveData()">SAVE</button><button class="main-btn" onclick="closeModal()">CLOSE</button>`;
-    } else {
-      body.innerHTML = `<h3>DELETE</h3><div class="input-wrapper"><input type="password" id="delPass" placeholder="Password..."><span class="toggle-pass" onclick="toggleVisibility('delPass')">SHOW</span></div><button class="main-btn" onclick="confirmDelete(${index})">DELETE</button><button class="main-btn" onclick="closeModal()">CLOSE</button>`;
-    }
+  function check(type) {
+    if(document.getElementById('p').value === PASSWORD) { alert("Access Granted"); document.getElementById('unifiedModal').style.display = 'none'; }
+    else alert("Invalid Password!");
   }
 
-  function checkPassword() { if(document.getElementById('passCheck').value === PASSWORD) openModal('admin'); else alert("Invalid Password!"); }
-  function closeModal() { document.getElementById('unifiedModal').style.display = 'none'; }
-  async function copyScript(i) { const btn = document.getElementById(`btn-${i}`); await navigator.clipboard.writeText(data.scripts[i].code); data.scripts[i].count += 1; localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); btn.innerText = "COPIED!"; setTimeout(() => { btn.innerText = "COPY SCRIPT"; render(); }, 1000); }
-  function confirmDelete(i) { if(document.getElementById('delPass').value === PASSWORD) { data.scripts.splice(i, 1); localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); closeModal(); render(); } else alert("Invalid Password!"); }
-  function saveData() { const name = document.getElementById('nInput').value; const code = document.getElementById('cInput').value; const ann = document.getElementById('annInput').value; if(ann) data.announcement = ann; if(name && code) data.scripts.push({name, code, count: 0}); localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); closeModal(); render(); }
+  async function copyScript(i) {
+    await navigator.clipboard.writeText(data.scripts[i].code);
+    data.scripts[i].count += 1;
+    localStorage.setItem("syntaxData_FINAL_v17", JSON.stringify(data));
+    render();
+  }
 
   render();
 </script>
