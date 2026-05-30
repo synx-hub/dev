@@ -30,13 +30,14 @@
     .del-btn { position:absolute; top:5px; right:5px; background:none; border:none; color:rgba(255,255,255,0.1); cursor:pointer; font-size:0.8rem; transition:0.3s; }
     .del-btn:hover { color:rgba(255,68,68,0.8); }
 
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); justify-content:center; align-items:center; z-index:9999; }
-    .modal-content { background:#0a0a0c; padding:30px; border:1px solid var(--accent); border-radius:15px; width:90%; max-width:400px; text-align:center; }
+    /* MOBILE OPTIMIZED MODAL */
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); justify-content:center; align-items:flex-start; z-index:9999; overflow-y:auto; padding-top: 50px; }
+    .modal-content { background:#0a0a0c; padding:20px; border:1px solid var(--accent); border-radius:15px; width:90%; max-width:400px; text-align:center; margin-bottom: 50px; }
     
     .input-wrapper { position: relative; width: 100%; }
     input { width:100%; padding:12px; margin:5px 0 15px 0; background:#000; border:1px solid #333; color:white; border-radius:5px; box-sizing:border-box; transition:0.3s; }
     input:focus { border-color:var(--accent); box-shadow: 0 0 10px rgba(0,225,255,0.3); outline:none; }
-    .toggle-pass { position: absolute; right: 10px; top: 15px; cursor: pointer; color: var(--accent); font-size: 0.8rem; }
+    .toggle-pass { position: absolute; right: 10px; top: 15px; cursor: pointer; color: var(--accent); font-size: 0.7rem; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -66,7 +67,7 @@
 
 <script>
   const STORAGE_KEY = "syntaxData_FINAL_v17";
-  const PASSWORD = "syntax2011"; // Password updated to syntax2011
+  const PASSWORD = "syntax2011";
   
   let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
     announcement: "Welcome to Syntax Hub - Elite Scripts",
