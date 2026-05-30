@@ -6,67 +6,78 @@
   <title>SYNTAX HUB | ELITE</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <style>
-    :root{ --bg:#050a14; --accent:#7000ff; --text:#e0f7ff; }
-    body{ background:var(--bg); color:var(--text); font-family:'Share Tech Mono', monospace; padding:10px; margin:0; }
-    .container{ max-width:600px; margin:auto; }
+    :root{ --bg:#050a14; --accent:#00e1ff; --text:#e0f7ff; }
+    body{ background:var(--bg); color:var(--text); font-family:'Share Tech Mono', monospace; padding:15px; margin:0; }
+    .container{ max-width:600px; margin:auto; width:100%; box-sizing:border-box; }
     
-    .dashboard-container { background:rgba(112,0,255,0.1); border:1px solid var(--accent); padding:15px; border-radius:12px; margin-bottom:15px; }
-    .dashboard-title { font-family:Orbitron; color:var(--accent); margin-bottom:10px; font-weight:bold; text-align:center; }
+    .header-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .script-card{ background:rgba(13,22,38,0.8); border:1px solid var(--accent); padding:15px; border-radius:15px; margin-bottom:15px; position:relative; }
+    .script-body{ background:#000; padding:8px; border-radius:8px; font-size:0.75rem; color:var(--accent); border-left:3px solid var(--accent); margin:10px 0; word-break: break-all; }
+    .main-btn { padding:10px 15px; background:transparent; border:1px solid var(--accent); color:var(--accent); cursor:pointer; width:100%; font-family:Orbitron; border-radius:5px; }
+    .main-btn:hover { background:var(--accent); color:#000; }
     
-    /* Reverted to the compact flex layout to fit all items */
-    .stats-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
-    .stat-item { background:rgba(0,0,0,0.3); padding:5px 8px; border-radius:6px; text-align:center; border:1px solid #222; font-size:0.65rem; }
-    .stat-val { font-size:0.8rem; color:var(--accent); font-weight:bold; display:block; }
-    
-    .script-card{ background:rgba(20,20,30,0.8); border:1px solid var(--accent); padding:12px; border-radius:10px; margin-bottom:12px; }
-    .script-body{ background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:var(--accent); margin:8px 0; word-break:break-all; border-left:3px solid var(--accent); }
-    .main-btn { padding:8px; background:transparent; border:1px solid var(--accent); color:var(--accent); cursor:pointer; width:100%; border-radius:5px; font-family:Orbitron; font-size:0.75rem; }
-    
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; }
-    .modal-content { background:#111; padding:20px; border:1px solid var(--accent); border-radius:10px; width:85%; max-width:300px; }
-    input { width:100%; padding:8px; margin:5px 0; background:#000; border:1px solid #444; color:white; border-radius:4px; box-sizing:border-box; }
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center; padding:10px; box-sizing:border-box; }
+    .modal-content { background:#0a0a0c; padding:20px; border:1px solid var(--accent); border-radius:15px; width:100%; max-width:400px; }
+    .input-wrapper { position: relative; width: 100%; }
+    input { width:100%; padding:10px; margin:5px 0 10px 0; background:#000; border:1px solid #333; color:white; border-radius:5px; box-sizing:border-box; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="dashboard-container">
-    <div class="dashboard-title">Usage Dashboard</div>
-    <div class="stats-grid" id="dashboard-stats"></div>
+  <div class="header-row">
+    <h1 style="font-family:Orbitron; color:var(--accent); margin:0;">SYNTAX HUB</h1>
+    <button class="main-btn" style="width:auto; padding:5px 10px" onclick="openModal('password')">ADMIN</button>
   </div>
+
   <div id="scripts-container"></div>
 </div>
 
-<div id="modal" class="modal"><div class="modal-content" id="modalBody"></div></div>
+<div id="unifiedModal" class="modal">
+  <div class="modal-content" id="modalBody"></div>
+</div>
 
 <script>
   const PASSWORD = "syntax2011";
-  let data = {
-    scripts: [
-      {name: 'Adopt Me', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/adopt-me"))()', count: 0},
-      {name: 'MM2', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/Overdrive-H/refs/heads/main/loader.lua"))()', count: 0},
-      {name: 'Steal A Brainrot', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/sab"))()', count: 0},
-      {name: 'Sailor', code: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/blf30331e1af9ab6a96fc80cd08b28a9.lua"))()', count: 0},
-      {name: 'Blox Fruit', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))()', count: 0}
-    ]
-  };
+  const scripts = [
+    {name: 'Adopt Me', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/adopt-me"))()'},
+    {name: 'Murder Mystery 2', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/Overdrive-H/refs/heads/main/loader.lua"))()'},
+    {name: 'Blox Fruit', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))()'},
+    {name: 'Steal A Brainrot', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/sab"))()'},
+    {name: 'Sailor Piece', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx/loader/v1"))()'}
+  ];
 
   function render() {
     const container = document.getElementById('scripts-container');
-    const dash = document.getElementById('dashboard-stats');
-    container.innerHTML = ''; dash.innerHTML = '';
-    
-    data.scripts.forEach((s, i) => {
-      dash.innerHTML += `<div class="stat-item">${s.name}<span class="stat-val">${s.count}</span></div>`;
-      container.innerHTML += `<div class="script-card"><div style="font-family:Orbitron; font-size:0.8rem;">⚡ ${s.name}</div><div class="script-body">${s.code}</div><button class="main-btn" onclick="copy(${i})">Copy Script</button></div>`;
+    container.innerHTML = '';
+    scripts.forEach((s, i) => {
+      container.innerHTML += `
+        <div class="script-card">
+          <div style="font-family:Orbitron; font-weight:bold;">⚡ ${s.name}</div>
+          <div class="script-body">${s.code}</div>
+          <button class="main-btn" id="btn-${i}" onclick="copyScript(${i})">COPY SCRIPT</button>
+        </div>`;
     });
   }
 
-  function copy(i) {
-    navigator.clipboard.writeText(data.scripts[i].code);
-    data.scripts[i].count += 1;
-    render();
+  async function copyScript(i) {
+    const btn = document.getElementById(`btn-${i}`);
+    await navigator.clipboard.writeText(scripts[i].code);
+    btn.innerText = "COPIED!";
+    setTimeout(() => { btn.innerText = "COPY SCRIPT"; }, 1500);
   }
+
+  function openModal(type) {
+    document.getElementById('unifiedModal').style.display = 'flex';
+    document.getElementById('modalBody').innerHTML = `<h3>ADMIN</h3><input type="password" id="passCheck" placeholder="Password..."><button class="main-btn" onclick="checkPassword()">ENTER</button><button class="main-btn" style="margin-top:10px" onclick="closeModal()">CLOSE</button>`;
+  }
+
+  function checkPassword() {
+    if(document.getElementById('passCheck').value === PASSWORD) alert("Admin Mode Active");
+    else alert("Invalid Password!");
+  }
+
+  function closeModal() { document.getElementById('unifiedModal').style.display = 'none'; }
 
   render();
 </script>
