@@ -6,95 +6,65 @@
   <title>SYNTAX HUB | ELITE</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <style>
-    :root{ --bg:#050a14; --accent:#00e1ff; --text:#e0f7ff; --success:#bc13fe; --warn:#ffcc00; }
+    :root{ --bg:#050a14; --accent:#7000ff; --text:#e0f7ff; }
     body{ background:var(--bg); color:var(--text); font-family:'Share Tech Mono', monospace; padding:10px; margin:0; }
-    .container{ max-width:1000px; margin:auto; }
+    .container{ max-width:600px; margin:auto; }
     
-    .announcement { background:rgba(255,204,0,0.05); border:1px solid var(--warn); padding:8px; border-radius:8px; margin-bottom:15px; text-align:center; font-size:0.8rem; color:var(--warn); }
-    .search-box { width:100%; padding:10px; margin-bottom:15px; background:#000; border:1px solid var(--accent); color:white; border-radius:8px; box-sizing:border-box; }
+    .dashboard-container { background:rgba(112,0,255,0.1); border:1px solid var(--accent); padding:15px; border-radius:12px; margin-bottom:15px; }
+    .dashboard-title { font-family:Orbitron; color:var(--accent); margin-bottom:10px; font-weight:bold; text-align:center; }
     
-    .dashboard-container { background:rgba(0,225,255,0.05); border:1px solid var(--accent); padding:15px; border-radius:12px; margin-bottom:15px; }
-    .dashboard-title { font-family:Orbitron; color:var(--accent); margin-bottom:10px; font-size:0.9rem; font-weight:bold; text-align:center; }
+    /* Reverted to the compact flex layout to fit all items */
+    .stats-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+    .stat-item { background:rgba(0,0,0,0.3); padding:5px 8px; border-radius:6px; text-align:center; border:1px solid #222; font-size:0.65rem; }
+    .stat-val { font-size:0.8rem; color:var(--accent); font-weight:bold; display:block; }
     
-    /* Flex-wrap ensures all 5+ items fit regardless of screen size */
-    .stats-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
-    .stat-item { background:rgba(0,0,0,0.5); padding:6px 10px; border-radius:6px; text-align:center; border:1px solid #222; font-size:0.7rem; flex: 1 1 80px; }
-    .stat-val { font-size:0.9rem; color:var(--accent); font-weight:bold; display:block; }
+    .script-card{ background:rgba(20,20,30,0.8); border:1px solid var(--accent); padding:12px; border-radius:10px; margin-bottom:12px; }
+    .script-body{ background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:var(--accent); margin:8px 0; word-break:break-all; border-left:3px solid var(--accent); }
+    .main-btn { padding:8px; background:transparent; border:1px solid var(--accent); color:var(--accent); cursor:pointer; width:100%; border-radius:5px; font-family:Orbitron; font-size:0.75rem; }
     
-    .status-box { margin-top:10px; padding:6px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:6px; font-size:0.7rem; text-align:center; }
-
-    .header-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
-    .script-card{ background:rgba(13,22,38,0.8); border:1px solid var(--accent); padding:15px; border-radius:12px; margin-bottom:15px; position:relative; }
-    .script-body{ background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:var(--accent); border-left:3px solid var(--accent); margin:10px 0; word-break:break-all; }
-    .main-btn { padding:8px 12px; background:transparent; border:1px solid var(--accent); color:var(--accent); cursor:pointer; width:100%; font-family:Orbitron; border-radius:5px; font-size:0.8rem; }
-    
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:9999; justify-content:center; align-items:center; padding:10px; box-sizing:border-box; }
-    .modal-content { background:#0a0a0c; padding:20px; border:1px solid var(--accent); border-radius:12px; width:100%; max-width:350px; }
-    input { width:100%; padding:10px; margin:5px 0 10px 0; background:#000; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box; }
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; }
+    .modal-content { background:#111; padding:20px; border:1px solid var(--accent); border-radius:10px; width:85%; max-width:300px; }
+    input { width:100%; padding:8px; margin:5px 0; background:#000; border:1px solid #444; color:white; border-radius:4px; box-sizing:border-box; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="announcement" id="announcementText">📢 Loading...</div>
-  <div class="header-row">
-    <h1 style="font-family:Orbitron; color:var(--accent); font-size:1.5rem; margin:0;">SYNTAX HUB</h1>
-    <button class="main-btn" style="width:auto" onclick="openModal('password')">ADMIN</button>
-  </div>
-  <input type="text" class="search-box" id="searchBar" placeholder="🔍 Search scripts..." onkeyup="render()">
   <div class="dashboard-container">
     <div class="dashboard-title">Usage Dashboard</div>
     <div class="stats-grid" id="dashboard-stats"></div>
-    <div class="status-box">Status: ● Undetected | Ver: 2.4.0</div>
   </div>
   <div id="scripts-container"></div>
 </div>
 
-<div id="unifiedModal" class="modal"><div class="modal-content" id="modalBody"></div></div>
+<div id="modal" class="modal"><div class="modal-content" id="modalBody"></div></div>
 
 <script>
   const PASSWORD = "syntax2011";
-  let data = JSON.parse(localStorage.getItem("syntaxData_FINAL_v17")) || {
-    announcement: "Welcome to Syntax Hub - Elite Scripts",
+  let data = {
     scripts: [
       {name: 'Adopt Me', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/adopt-me"))()', count: 0},
-      {name: 'Murder Mystery 2', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/Overdrive-H/refs/heads/main/loader.lua"))()', count: 0},
-      {name: 'Blox Fruit', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))()', count: 0},
+      {name: 'MM2', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/Overdrive-H/refs/heads/main/loader.lua"))()', count: 0},
       {name: 'Steal A Brainrot', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/sab"))()', count: 0},
-      {name: 'Sailor Piece', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/synx/loader/v1"))()', count: 0}
+      {name: 'Sailor', code: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/blf30331e1af9ab6a96fc80cd08b28a9.lua"))()', count: 0},
+      {name: 'Blox Fruit', code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))()', count: 0}
     ]
   };
 
   function render() {
-    const filter = document.getElementById('searchBar').value.toLowerCase();
     const container = document.getElementById('scripts-container');
     const dash = document.getElementById('dashboard-stats');
-    document.getElementById('announcementText').innerText = data.announcement;
     container.innerHTML = ''; dash.innerHTML = '';
     
     data.scripts.forEach((s, i) => {
       dash.innerHTML += `<div class="stat-item">${s.name}<span class="stat-val">${s.count}</span></div>`;
-      if (s.name.toLowerCase().includes(filter)) {
-        container.innerHTML += `<div class="script-card"><div style="font-family:Orbitron; font-weight:bold;">⚡ ${s.name}</div><div class="script-body">${s.code}</div><button class="main-btn" onclick="copyScript(${i})">COPY SCRIPT</button></div>`;
-      }
+      container.innerHTML += `<div class="script-card"><div style="font-family:Orbitron; font-size:0.8rem;">⚡ ${s.name}</div><div class="script-body">${s.code}</div><button class="main-btn" onclick="copy(${i})">Copy Script</button></div>`;
     });
   }
 
-  function openModal(type) {
-    const b = document.getElementById('modalBody');
-    document.getElementById('unifiedModal').style.display = 'flex';
-    b.innerHTML = `<h3>${type.toUpperCase()}</h3><input type="password" id="p" placeholder="Password"><button class="main-btn" onclick="check('${type}')">ENTER</button><button class="main-btn" onclick="document.getElementById('unifiedModal').style.display='none'">CLOSE</button>`;
-  }
-
-  function check(type) {
-    if(document.getElementById('p').value === PASSWORD) { alert("Access Granted"); document.getElementById('unifiedModal').style.display = 'none'; }
-    else alert("Invalid Password!");
-  }
-
-  async function copyScript(i) {
-    await navigator.clipboard.writeText(data.scripts[i].code);
+  function copy(i) {
+    navigator.clipboard.writeText(data.scripts[i].code);
     data.scripts[i].count += 1;
-    localStorage.setItem("syntaxData_FINAL_v17", JSON.stringify(data));
     render();
   }
 
