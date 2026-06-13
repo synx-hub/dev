@@ -1,438 +1,327 @@
--- // Grow a Garden 2 - Professional Loading Screen
--- // LocalScript inside StarterGui > ScreenGui
+-- // Grow a Garden 2 — ✦ PHANTOM DUPE ✦ v7
+-- // LocalScript inside StarterPlayerScripts or StarterGui
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
+local Players          = game:GetService("Players")
+local TweenService     = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui   = LocalPlayer:WaitForChild("PlayerGui")
+
+for _, g in ipairs(PlayerGui:GetChildren()) do
+    if g.Name == "PhantomDupeGUI" then g:Destroy() end
+end
+
+-------------------------------------------------
+-- HELPERS
+-------------------------------------------------
+local function tw(obj, props, t, style)
+    TweenService:Create(obj,
+        TweenInfo.new(t or 0.2, style or Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+        props):Play()
+end
+local function corner(p, r)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, r or 10)
+    c.Parent = p; return c
+end
+local function stroke(p, col, th)
+    local s = Instance.new("UIStroke")
+    s.Color = col; s.Thickness = th or 1.5
+    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    s.Parent = p; return s
+end
 
 -------------------------------------------------
 -- SCREEN GUI
 -------------------------------------------------
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "LoadingScreen"
-screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent = playerGui
+local SG = Instance.new("ScreenGui")
+SG.Name           = "PhantomDupeGUI"
+SG.ResetOnSpawn   = false
+SG.IgnoreGuiInset = true
+SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SG.Parent         = PlayerGui
 
 -------------------------------------------------
--- DARK FULLSCREEN BACKDROP
+-- TOGGLE BUTTON — top-left corner
 -------------------------------------------------
-local backdrop = Instance.new("Frame")
-backdrop.Size = UDim2.fromScale(1, 1)
-backdrop.BackgroundColor3 = Color3.fromRGB(6, 14, 6)
-backdrop.BorderSizePixel = 0
-backdrop.ZIndex = 1
-backdrop.Parent = screenGui
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size             = UDim2.new(0, 38, 0, 38)
+ToggleBtn.Position         = UDim2.new(1, -52, 0, 48)  -- below Roblox topbar
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 8, 32)
+ToggleBtn.Text             = "👻"
+ToggleBtn.TextSize         = 20
+ToggleBtn.Font             = Enum.Font.GothamBold
+ToggleBtn.TextColor3       = Color3.fromRGB(200, 160, 255)
+ToggleBtn.BorderSizePixel  = 0
+ToggleBtn.ZIndex           = 20
+ToggleBtn.Parent           = SG
+corner(ToggleBtn, 12)
+stroke(ToggleBtn, Color3.fromRGB(120, 60, 240), 1.5)
 
 -------------------------------------------------
--- FLOATING PARTICLES (emojis drifting upward)
+-- MAIN WINDOW
 -------------------------------------------------
-local PARTICLE_EMOJIS = { "🌱", "🌿", "🍃", "🌾", "🌻", "🌷", "✨", "🍀" }
+local W, H = 240, 190
 
-local function createParticle()
-	local p = Instance.new("TextLabel")
-	p.Size = UDim2.fromOffset(28, 28)
-	p.BackgroundTransparency = 1
-	p.Text = PARTICLE_EMOJIS[math.random(1, #PARTICLE_EMOJIS)]
-	p.TextScaled = true
-	p.TextTransparency = math.random(20, 50) / 100
-	p.ZIndex = 2
-	p.Position = UDim2.new(math.random(5, 95) / 100, 0, 1.05, 0)
-	p.Parent = backdrop
+local Win = Instance.new("Frame")
+Win.Name             = "Window"
+Win.Size             = UDim2.new(0, W, 0, 0)
+Win.Position         = UDim2.new(1, -254, 0, 94)  -- drops below toggle
+Win.BackgroundColor3 = Color3.fromRGB(9, 7, 20)
+Win.BorderSizePixel  = 0
+Win.ClipsDescendants = true
+Win.ZIndex           = 10
+Win.Parent           = SG
+corner(Win, 14)
+stroke(Win, Color3.fromRGB(90, 50, 200), 1.8)
 
-	local driftX = (math.random(-8, 8)) / 100
-	local targetPos = UDim2.new(
-		p.Position.X.Scale + driftX,
-		0, -0.08, 0
-	)
-	local duration = math.random(60, 110) / 10
+-- background gradient
+local wg = Instance.new("UIGradient")
+wg.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0,   Color3.fromRGB(20, 12, 46)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(12,  8, 28)),
+    ColorSequenceKeypoint.new(1,   Color3.fromRGB( 7,  5, 16)),
+})
+wg.Rotation = 130; wg.Parent = Win
 
-	local tween = TweenService:Create(p, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-		Position = targetPos,
-		TextTransparency = 1,
-	})
-	tween:Play()
-	tween.Completed:Connect(function()
-		p:Destroy()
-	end)
+local isOpen = false
+
+local function openWin()
+    isOpen = true
+    Win.Visible = true
+    Win.Position = UDim2.new(1, -254, 0, 94)
+    tw(Win, { Size = UDim2.new(0, W, 0, H) }, 0.35, Enum.EasingStyle.Back)
+    tw(ToggleBtn, { Rotation = 0, BackgroundColor3 = Color3.fromRGB(30, 14, 58) }, 0.2)
 end
 
--- Spawn particles continuously
-task.spawn(function()
-	while backdrop and backdrop.Parent do
-		createParticle()
-		task.wait(math.random(3, 7) / 10)
-	end
-end)
-
--- Burst of particles on start
-for i = 1, 14 do
-	task.delay(i * 0.08, createParticle)
+local function closeWin()
+    isOpen = false
+    tw(Win, { Size = UDim2.new(0, W, 0, 0) }, 0.25, Enum.EasingStyle.Quint)
+    tw(ToggleBtn, { BackgroundColor3 = Color3.fromRGB(15, 8, 32) }, 0.2)
+    task.delay(0.28, function() Win.Visible = false end)
 end
 
--------------------------------------------------
--- GLOWING ORBS (background ambience)
--------------------------------------------------
-local function createOrb(xScale, yScale, size, color, duration)
-	local orb = Instance.new("Frame")
-	orb.Size = UDim2.fromOffset(size, size)
-	orb.Position = UDim2.new(xScale, -size/2, yScale, -size/2)
-	orb.BackgroundColor3 = color
-	orb.BackgroundTransparency = 0.82
-	orb.BorderSizePixel = 0
-	orb.ZIndex = 1
-	orb.Parent = backdrop
+Win.Visible = false
+ToggleBtn.MouseButton1Click:Connect(function()
+    if isOpen then closeWin() else openWin() end
+end)
 
-	local orbCorner = Instance.new("UICorner")
-	orbCorner.CornerRadius = UDim.new(1, 0)
-	orbCorner.Parent = orb
+-------------------------------------------------
+-- TOPBAR  (drag handle + title + X)
+-------------------------------------------------
+local TB = Instance.new("Frame")
+TB.Size             = UDim2.new(1, 0, 0, 44)
+TB.BackgroundColor3 = Color3.fromRGB(14, 9, 32)
+TB.BorderSizePixel  = 0
+TB.ZIndex           = 11
+TB.Parent           = Win
+corner(TB, 14)
 
-	-- Float up and down
-	TweenService:Create(orb, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-		Position = UDim2.new(xScale, -size/2, yScale - 0.04, -size/2)
-	}):Play()
+-- square off bottom corners of topbar
+local tbBot = Instance.new("Frame")
+tbBot.Size             = UDim2.new(1, 0, 0, 14)
+tbBot.Position         = UDim2.new(0, 0, 1, -14)
+tbBot.BackgroundColor3 = Color3.fromRGB(14, 9, 32)
+tbBot.BorderSizePixel  = 0; tbBot.ZIndex = 11; tbBot.Parent = TB
+
+-- ghost icon on topbar
+local TBIcon = Instance.new("TextLabel")
+TBIcon.Size               = UDim2.new(0, 30, 1, 0)
+TBIcon.Position           = UDim2.new(0, 10, 0, 0)
+TBIcon.BackgroundTransparency = 1
+TBIcon.Text               = "👻"
+TBIcon.TextSize           = 18
+TBIcon.Font               = Enum.Font.GothamBold
+TBIcon.ZIndex             = 12; TBIcon.Parent = TB
+
+-- title
+local TitleLbl = Instance.new("TextLabel")
+TitleLbl.Size               = UDim2.new(1, -90, 1, 0)
+TitleLbl.Position           = UDim2.new(0, 44, 0, 0)
+TitleLbl.BackgroundTransparency = 1
+TitleLbl.Text               = "PHANTOM DUPE"
+TitleLbl.TextColor3         = Color3.fromRGB(215, 190, 255)
+TitleLbl.TextSize           = 13
+TitleLbl.Font               = Enum.Font.GothamBlack
+TitleLbl.TextXAlignment     = Enum.TextXAlignment.Left
+TitleLbl.ZIndex             = 12; TitleLbl.Parent = TB
+
+-- X close button (top-right of topbar)
+local XBtn = Instance.new("TextButton")
+XBtn.Size             = UDim2.new(0, 26, 0, 26)
+XBtn.Position         = UDim2.new(1, -34, 0.5, -13)
+XBtn.BackgroundColor3 = Color3.fromRGB(160, 30, 60)
+XBtn.Text             = "✕"
+XBtn.TextColor3       = Color3.fromRGB(255, 200, 210)
+XBtn.TextSize         = 11
+XBtn.Font             = Enum.Font.GothamBold
+XBtn.BorderSizePixel  = 0
+XBtn.ZIndex           = 13; XBtn.Parent = TB
+corner(XBtn, 7)
+stroke(XBtn, Color3.fromRGB(220, 60, 90), 1)
+XBtn.MouseButton1Click:Connect(function()
+    closeWin()
+end)
+
+-- thin accent line under topbar
+local AccentLine = Instance.new("Frame")
+AccentLine.Size             = UDim2.new(1, -16, 0, 2)
+AccentLine.Position         = UDim2.new(0, 8, 0, 44)
+AccentLine.BackgroundColor3 = Color3.fromRGB(110, 60, 220)
+AccentLine.BorderSizePixel  = 0; AccentLine.ZIndex = 11; AccentLine.Parent = Win
+
+local lineGrad = Instance.new("UIGradient")
+lineGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0,   Color3.fromRGB(60, 20, 160)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(160, 80, 255)),
+    ColorSequenceKeypoint.new(1,   Color3.fromRGB(60, 20, 160)),
+})
+lineGrad.Parent = AccentLine
+corner(AccentLine, 2)
+
+-------------------------------------------------
+-- DUPE COUNT BADGE  (below topbar, centered)
+-------------------------------------------------
+local BadgeRow = Instance.new("Frame")
+BadgeRow.Size             = UDim2.new(1, -24, 0, 30)
+BadgeRow.Position         = UDim2.new(0, 12, 0, 54)
+BadgeRow.BackgroundColor3 = Color3.fromRGB(14, 9, 32)
+BadgeRow.BorderSizePixel  = 0; BadgeRow.ZIndex = 11; BadgeRow.Parent = Win
+corner(BadgeRow, 8)
+stroke(BadgeRow, Color3.fromRGB(60, 35, 130), 1)
+
+local BadgeIcon = Instance.new("TextLabel")
+BadgeIcon.Size               = UDim2.new(0, 22, 1, 0)
+BadgeIcon.Position           = UDim2.new(0, 8, 0, 0)
+BadgeIcon.BackgroundTransparency = 1
+BadgeIcon.Text               = "🧬"
+BadgeIcon.TextSize           = 14
+BadgeIcon.Font               = Enum.Font.GothamBold
+BadgeIcon.ZIndex             = 12; BadgeIcon.Parent = BadgeRow
+
+local BadgeLbl = Instance.new("TextLabel")
+BadgeLbl.Size               = UDim2.new(1, -36, 1, 0)
+BadgeLbl.Position           = UDim2.new(0, 32, 0, 0)
+BadgeLbl.BackgroundTransparency = 1
+BadgeLbl.Text               = "Total Duped:  0"
+BadgeLbl.TextColor3         = Color3.fromRGB(170, 140, 230)
+BadgeLbl.TextSize           = 11
+BadgeLbl.Font               = Enum.Font.GothamBold
+BadgeLbl.TextXAlignment     = Enum.TextXAlignment.Left
+BadgeLbl.ZIndex             = 12; BadgeLbl.Parent = BadgeRow
+
+-------------------------------------------------
+-- BIG DUPE BUTTON
+-------------------------------------------------
+local DupeBtn = Instance.new("TextButton")
+DupeBtn.Size             = UDim2.new(1, -24, 0, 62)
+DupeBtn.Position         = UDim2.new(0, 12, 0, 92)
+DupeBtn.BackgroundColor3 = Color3.fromRGB(22, 10, 54)
+DupeBtn.BorderSizePixel  = 0
+DupeBtn.Text             = "DUPE CURRENT ITEM"
+DupeBtn.TextColor3       = Color3.fromRGB(175, 120, 255)
+DupeBtn.TextSize         = 16
+DupeBtn.Font             = Enum.Font.GothamBlack
+DupeBtn.AutoButtonColor  = false
+DupeBtn.ZIndex           = 11; DupeBtn.Parent = Win
+corner(DupeBtn, 12)
+stroke(DupeBtn, Color3.fromRGB(120, 70, 240), 2)
+
+local dbGrad = Instance.new("UIGradient")
+dbGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(36, 18, 88)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(14,  6, 40)),
+})
+dbGrad.Rotation = 135; dbGrad.Parent = DupeBtn
+
+DupeBtn.MouseEnter:Connect(function()
+    tw(DupeBtn, { BackgroundColor3 = Color3.fromRGB(44, 22, 100) }, 0.14)
+    tw(DupeBtn, { TextColor3 = Color3.fromRGB(210, 170, 255) }, 0.14)
+end)
+DupeBtn.MouseLeave:Connect(function()
+    tw(DupeBtn, { BackgroundColor3 = Color3.fromRGB(22, 10, 54) }, 0.14)
+    tw(DupeBtn, { TextColor3 = Color3.fromRGB(175, 120, 255) }, 0.14)
+end)
+
+-------------------------------------------------
+-- STATUS LABEL
+-------------------------------------------------
+local StatusLbl = Instance.new("TextLabel")
+StatusLbl.Size               = UDim2.new(1, -24, 0, 22)
+StatusLbl.Position           = UDim2.new(0, 12, 0, 162)
+StatusLbl.BackgroundTransparency = 1
+StatusLbl.Text               = "✦  Ready to dupe"
+StatusLbl.TextColor3         = Color3.fromRGB(120, 90, 180)
+StatusLbl.TextSize           = 11
+StatusLbl.Font               = Enum.Font.Gotham
+StatusLbl.TextXAlignment     = Enum.TextXAlignment.Center
+StatusLbl.ZIndex             = 11; StatusLbl.Parent = Win
+
+-------------------------------------------------
+-- DRAG
+-------------------------------------------------
+local drag, ds, sp = false, nil, nil
+TB.InputBegan:Connect(function(inp)
+    if inp.UserInputType == Enum.UserInputType.MouseButton1
+    or inp.UserInputType == Enum.UserInputType.Touch then
+        drag = true; ds = inp.Position; sp = Win.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(inp)
+    if drag and (inp.UserInputType == Enum.UserInputType.MouseMovement
+    or inp.UserInputType == Enum.UserInputType.Touch) then
+        local d = inp.Position - ds
+        Win.Position = UDim2.new(sp.X.Scale, sp.X.Offset+d.X, sp.Y.Scale, sp.Y.Offset+d.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(inp)
+    if inp.UserInputType == Enum.UserInputType.MouseButton1
+    or inp.UserInputType == Enum.UserInputType.Touch then drag = false end
+end)
+
+-------------------------------------------------
+-- DUPE LOGIC
+-------------------------------------------------
+local dupeCount = 0
+
+local function getHeldTool()
+    local char = LocalPlayer.Character
+    if not char then return nil end
+    for _, item in ipairs(char:GetChildren()) do
+        if item:IsA("Tool") then return item end
+    end
+    return nil
 end
 
-createOrb(0.15, 0.25, 180, Color3.fromRGB(30, 120, 40),  3.5)
-createOrb(0.78, 0.60, 140, Color3.fromRGB(60, 160, 70),  4.2)
-createOrb(0.50, 0.80, 100, Color3.fromRGB(100, 200, 80), 2.8)
-createOrb(0.88, 0.15, 120, Color3.fromRGB(20,  90, 30),  5.1)
+DupeBtn.MouseButton1Click:Connect(function()
+    tw(DupeBtn, { BackgroundColor3 = Color3.fromRGB(70, 35, 150) }, 0.07)
+    tw(DupeBtn, { TextColor3 = Color3.fromRGB(235, 215, 255) }, 0.07)
+    task.wait(0.1)
+    tw(DupeBtn, { BackgroundColor3 = Color3.fromRGB(22, 10, 54) }, 0.3)
+    tw(DupeBtn, { TextColor3 = Color3.fromRGB(175, 120, 255) }, 0.3)
 
--------------------------------------------------
--- MAIN CARD
--------------------------------------------------
-local card = Instance.new("Frame")
-card.Name = "Card"
-card.Size = UDim2.new(0, 480, 0, 230)
-card.Position = UDim2.new(0.5, -240, 0.5, -115)
-card.BackgroundColor3 = Color3.fromRGB(8, 18, 8)
-card.BackgroundTransparency = 0.08
-card.BorderSizePixel = 0
-card.ZIndex = 10
-card.Parent = screenGui
+    local tool = getHeldTool()
+    if not tool then
+        StatusLbl.Text       = "⚠  Equip a tool first!"
+        StatusLbl.TextColor3 = Color3.fromRGB(230, 80, 80)
+        task.delay(2, function()
+            StatusLbl.Text       = "✦  Ready to dupe"
+            StatusLbl.TextColor3 = Color3.fromRGB(120, 90, 180)
+        end)
+        return
+    end
 
-local cardCorner = Instance.new("UICorner")
-cardCorner.CornerRadius = UDim.new(0, 20)
-cardCorner.Parent = card
+    local cloned = tool:Clone()
+    cloned.Parent = LocalPlayer.Backpack
 
--- Animated border stroke
-local cardStroke = Instance.new("UIStroke")
-cardStroke.Color = Color3.fromRGB(76, 175, 80)
-cardStroke.Thickness = 2
-cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-cardStroke.Parent = card
+    dupeCount += 1
+    BadgeLbl.Text        = "Total Duped:  " .. dupeCount
+    StatusLbl.Text       = "✦  Duped  [ " .. tool.Name .. " ]"
+    StatusLbl.TextColor3 = Color3.fromRGB(130, 230, 130)
 
-task.spawn(function()
-	while card and card.Parent do
-		TweenService:Create(cardStroke, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), {
-			Thickness = 3.5
-		}):Play()
-		task.wait(2)
-	end
-end)
-
--- Subtle inner gradient overlay
-local gradFrame = Instance.new("Frame")
-gradFrame.Size = UDim2.fromScale(1, 1)
-gradFrame.BackgroundColor3 = Color3.fromRGB(20, 50, 20)
-gradFrame.BackgroundTransparency = 0.88
-gradFrame.BorderSizePixel = 0
-gradFrame.ZIndex = 10
-gradFrame.Parent = card
-
-local gradCorner = Instance.new("UICorner")
-gradCorner.CornerRadius = UDim.new(0, 20)
-gradCorner.Parent = gradFrame
-
--------------------------------------------------
--- TITLE
--------------------------------------------------
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -20, 0, 32)
-titleLabel.Position = UDim2.new(0, 10, 0, 18)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "🌱  Grow a Garden 2"
-titleLabel.TextColor3 = Color3.fromRGB(220, 255, 200)
-titleLabel.Font = Enum.Font.GothamBlack
-titleLabel.TextSize = 22
-titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-titleLabel.ZIndex = 11
-titleLabel.Parent = card
-
--- Subtle title glow pulse
-task.spawn(function()
-	while titleLabel and titleLabel.Parent do
-		TweenService:Create(titleLabel, TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), {
-			TextColor3 = Color3.fromRGB(168, 255, 140)
-		}):Play()
-		task.wait(2.5)
-	end
-end)
-
--------------------------------------------------
--- SEASON TAG
--------------------------------------------------
-local seasonTag = Instance.new("TextLabel")
-seasonTag.Size = UDim2.new(0, 140, 0, 18)
-seasonTag.Position = UDim2.new(0.5, -70, 0, 54)
-seasonTag.BackgroundColor3 = Color3.fromRGB(30, 80, 30)
-seasonTag.BackgroundTransparency = 0.3
-seasonTag.Text = "✦  SEASON OF BLOOM  ✦"
-seasonTag.TextColor3 = Color3.fromRGB(139, 210, 74)
-seasonTag.Font = Enum.Font.GothamBold
-seasonTag.TextSize = 9
-seasonTag.TextXAlignment = Enum.TextXAlignment.Center
-seasonTag.ZIndex = 11
-seasonTag.Parent = card
-
-local seasonCorner = Instance.new("UICorner")
-seasonCorner.CornerRadius = UDim.new(0, 6)
-seasonCorner.Parent = seasonTag
-
--------------------------------------------------
--- SUB LABEL
--------------------------------------------------
-local subLabel = Instance.new("TextLabel")
-subLabel.Size = UDim2.new(1, -30, 0, 16)
-subLabel.Position = UDim2.new(0, 15, 0, 82)
-subLabel.BackgroundTransparency = 1
-subLabel.Text = "Loading Grow a Garden 2  —  first execute may be slow"
-subLabel.TextColor3 = Color3.fromRGB(120, 180, 100)
-subLabel.Font = Enum.Font.GothamBold
-subLabel.TextSize = 11
-subLabel.TextXAlignment = Enum.TextXAlignment.Center
-subLabel.ZIndex = 11
-subLabel.Parent = card
-
--------------------------------------------------
--- STATUS LABEL (flavor messages)
--------------------------------------------------
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -30, 0, 16)
-statusLabel.Position = UDim2.new(0, 15, 0, 104)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Initializing secure connection..."
-statusLabel.TextColor3 = Color3.fromRGB(160, 220, 120)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 11
-statusLabel.TextXAlignment = Enum.TextXAlignment.Center
-statusLabel.TextTransparency = 0.2
-statusLabel.ZIndex = 11
-statusLabel.Parent = card
-
-local STATUS_MESSAGES = {
-	"Initializing secure connection...",
-	"Bypassing anti-cheat layer...",
-	"Injecting garden modules...",
-	"Spoofing player token...",
-	"Patching memory allocation...",
-	"Hooking render pipeline...",
-	"Decrypting seed database...",
-	"Authenticating farmer ID...",
-	"Establishing secure plot tunnel...",
-	"Flushing detection flags...",
-	"Compiling garden runtime...",
-	"All systems nominal. Welcome.",
-}
-
-local msgIndex = 1
-task.spawn(function()
-	while statusLabel and statusLabel.Parent do
-		task.wait(1.4 + math.random() * 0.8)
-		msgIndex = msgIndex % #STATUS_MESSAGES + 1
-		TweenService:Create(statusLabel, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { TextTransparency = 1 }):Play()
-		task.wait(0.22)
-		statusLabel.Text = STATUS_MESSAGES[msgIndex]
-		TweenService:Create(statusLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { TextTransparency = 0.2 }):Play()
-	end
-end)
-
--------------------------------------------------
--- PROGRESS BAR TRACK
--------------------------------------------------
-local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(1, -50, 0, 8)
-barBg.Position = UDim2.new(0, 25, 0, 136)
-barBg.BackgroundColor3 = Color3.fromRGB(10, 28, 10)
-barBg.BorderSizePixel = 0
-barBg.ZIndex = 11
-barBg.Parent = card
-
-local barBgCorner = Instance.new("UICorner")
-barBgCorner.CornerRadius = UDim.new(0, 4)
-barBgCorner.Parent = barBg
-
--- Bar fill
-local barFill = Instance.new("Frame")
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(76, 175, 80)
-barFill.BorderSizePixel = 0
-barFill.ZIndex = 12
-barFill.Parent = barBg
-
-local fillCorner = Instance.new("UICorner")
-fillCorner.CornerRadius = UDim.new(0, 4)
-fillCorner.Parent = barFill
-
--- Shimmer on bar fill
-local shimmer = Instance.new("Frame")
-shimmer.Size = UDim2.new(0, 60, 1, 0)
-shimmer.Position = UDim2.new(-0.2, 0, 0, 0)
-shimmer.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-shimmer.BackgroundTransparency = 0.7
-shimmer.BorderSizePixel = 0
-shimmer.ZIndex = 13
-shimmer.ClipsDescendants = false
-shimmer.Parent = barFill
-
-local shimCorner = Instance.new("UICorner")
-shimCorner.CornerRadius = UDim.new(0, 4)
-shimCorner.Parent = shimmer
-
-task.spawn(function()
-	while shimmer and shimmer.Parent do
-		shimmer.Position = UDim2.new(-0.3, 0, 0, 0)
-		TweenService:Create(shimmer, TweenInfo.new(1.6, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-			Position = UDim2.new(1.1, 0, 0, 0)
-		}):Play()
-		task.wait(2.2)
-	end
-end)
-
--------------------------------------------------
--- PERCENT LABEL
--------------------------------------------------
-local percentLabel = Instance.new("TextLabel")
-percentLabel.Size = UDim2.new(1, 0, 0, 20)
-percentLabel.Position = UDim2.new(0, 0, 0, 152)
-percentLabel.BackgroundTransparency = 1
-percentLabel.Text = "0.0%"
-percentLabel.TextColor3 = Color3.fromRGB(200, 240, 180)
-percentLabel.Font = Enum.Font.GothamBlack
-percentLabel.TextSize = 13
-percentLabel.TextXAlignment = Enum.TextXAlignment.Center
-percentLabel.ZIndex = 11
-percentLabel.Parent = card
-
--------------------------------------------------
--- STAGE DOTS  (5 small dots under percent)
--------------------------------------------------
-local dotsFrame = Instance.new("Frame")
-dotsFrame.Size = UDim2.new(0, 120, 0, 14)
-dotsFrame.Position = UDim2.new(0.5, -60, 0, 182)
-dotsFrame.BackgroundTransparency = 1
-dotsFrame.ZIndex = 11
-dotsFrame.Parent = card
-
-local dotsLayout = Instance.new("UIListLayout")
-dotsLayout.FillDirection = Enum.FillDirection.Horizontal
-dotsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-dotsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-dotsLayout.Padding = UDim.new(0, 10)
-dotsLayout.Parent = dotsFrame
-
-local STAGE_LABELS = { "World", "Maps", "Crops", "Wild", "Sky" }
-local stageDots = {}
-
-for i = 1, 5 do
-	local dot = Instance.new("Frame")
-	dot.Size = UDim2.fromOffset(8, 8)
-	dot.BackgroundColor3 = Color3.fromRGB(30, 70, 30)
-	dot.BorderSizePixel = 0
-	dot.ZIndex = 12
-	dot.Parent = dotsFrame
-
-	local dc = Instance.new("UICorner")
-	dc.CornerRadius = UDim.new(1, 0)
-	dc.Parent = dot
-
-	stageDots[i] = dot
-end
-
-local function setDotActive(index)
-	for i, dot in ipairs(stageDots) do
-		if i < index then
-			TweenService:Create(dot, TweenInfo.new(0.3), { BackgroundColor3 = Color3.fromRGB(76, 175, 80) }):Play()
-		elseif i == index then
-			TweenService:Create(dot, TweenInfo.new(0.3), { BackgroundColor3 = Color3.fromRGB(180, 255, 100) }):Play()
-			TweenService:Create(dot, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-				BackgroundColor3 = Color3.fromRGB(100, 200, 60)
-			}):Play()
-		else
-			TweenService:Create(dot, TweenInfo.new(0.3), { BackgroundColor3 = Color3.fromRGB(30, 70, 30) }):Play()
-		end
-	end
-end
-
--------------------------------------------------
--- VERSION
--------------------------------------------------
-local versionLabel = Instance.new("TextLabel")
-versionLabel.Size = UDim2.new(0, 60, 0, 14)
-versionLabel.Position = UDim2.new(1, -68, 1, -20)
-versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v2.0.1"
-versionLabel.TextColor3 = Color3.fromRGB(60, 120, 50)
-versionLabel.Font = Enum.Font.Gotham
-versionLabel.TextSize = 10
-versionLabel.ZIndex = 11
-versionLabel.Parent = card
-
--------------------------------------------------
--- CARD FADE IN ON START
--------------------------------------------------
-card.BackgroundTransparency = 1
-gradFrame.BackgroundTransparency = 1
-titleLabel.TextTransparency = 1
-subLabel.TextTransparency = 1
-statusLabel.TextTransparency = 1
-percentLabel.TextTransparency = 1
-seasonTag.BackgroundTransparency = 1
-seasonTag.TextTransparency = 1
-
-task.delay(0.1, function()
-	TweenService:Create(card, TweenInfo.new(0.7, Enum.EasingStyle.Quad), { BackgroundTransparency = 0.08 }):Play()
-	TweenService:Create(gradFrame, TweenInfo.new(0.7), { BackgroundTransparency = 0.88 }):Play()
-	task.wait(0.2)
-	TweenService:Create(titleLabel, TweenInfo.new(0.5), { TextTransparency = 0 }):Play()
-	task.wait(0.1)
-	TweenService:Create(seasonTag, TweenInfo.new(0.4), { BackgroundTransparency = 0.3, TextTransparency = 0 }):Play()
-	task.wait(0.1)
-	TweenService:Create(subLabel, TweenInfo.new(0.4), { TextTransparency = 0 }):Play()
-	task.wait(0.1)
-	TweenService:Create(statusLabel, TweenInfo.new(0.4), { TextTransparency = 0.2 }):Play()
-	task.wait(0.1)
-	TweenService:Create(percentLabel, TweenInfo.new(0.4), { TextTransparency = 0 }):Play()
-end)
-
--------------------------------------------------
--- PROGRESS LOGIC
--------------------------------------------------
-local targetPercent = 99.8
-local duration = 140
-local startTime = tick()
-local currentPercent = 0
-local lastDotStage = 0
-
-RunService.Heartbeat:Connect(function()
-	if currentPercent >= targetPercent then return end
-
-	local t = math.min((tick() - startTime) / duration, 1)
-	local eased = 1 - (1 - t) ^ 3
-
-	currentPercent = eased * targetPercent
-	barFill.Size = UDim2.new(currentPercent / 100, 0, 1, 0)
-	percentLabel.Text = string.format("%.1f%%", currentPercent)
-
-	-- Update stage dots based on progress
-	local stage = math.ceil(currentPercent / 20)
-	stage = math.clamp(stage, 1, 5)
-	if stage ~= lastDotStage then
-		lastDotStage = stage
-		setDotActive(stage)
-	end
+    task.delay(2, function()
+        StatusLbl.Text       = "✦  Ready to dupe"
+        StatusLbl.TextColor3 = Color3.fromRGB(120, 90, 180)
+    end)
 end)
