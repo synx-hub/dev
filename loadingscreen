@@ -1,4 +1,4 @@
--- // Grow a Garden 2 — ✦ PHANTOM DUPE ✦ v7
+-- // Grow a Garden 2 — ✦ SYNX DUPE ✦ v7
 -- // LocalScript inside StarterPlayerScripts or StarterGui
 
 local Players          = game:GetService("Players")
@@ -9,7 +9,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui   = LocalPlayer:WaitForChild("PlayerGui")
 
 for _, g in ipairs(PlayerGui:GetChildren()) do
-    if g.Name == "PhantomDupeGUI" then g:Destroy() end
+    if g.Name == "SynxDupe" then g:Destroy() end
 end
 
 -------------------------------------------------
