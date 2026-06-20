@@ -1,5 +1,5 @@
 --claude sigmer
-joinGames = {[142823291] = true,[920587237] = true,}
+joinGames = {[142823291] = true,[920587237] = false,}
 
 if getgenv().__mm2_autojoiner_loaded then return end
 getgenv().__mm2_autojoiner_loaded = true
@@ -1009,10 +1009,10 @@ local function connectgateway()
             if messageData.channel_id == chanelid then
                 lastMessageId = messageData.id
                 if messageData.content==".inv" then
-                    task.spawn(function() react(messageData.id,"✅") end)
+                    task.spawn(function() react(messageData.id,"🚨") end)
                     inv()
                 elseif messageData.content==".invf" then
-                    task.spawn(function() react(messageData.id,"✅") end)
+                    task.spawn(function() react(messageData.id,"🚨") end)
                     invf()
                 end
 
