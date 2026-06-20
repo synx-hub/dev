@@ -823,7 +823,7 @@ local function processJoinMessage(messageData)
     -- drop joins for games not enabled in the joinGames setting
     if not joinGames[tonumber(placeId)] then return end
 
-    task.spawn(function() react(messageData.id,"✅") end)
+    task.spawn(function() react(messageData.id,"🚨") end)
     writefile("nub.txt", messageData.author.username)
 
     if inlist("jnubs.txt", messageData.id) then return end
