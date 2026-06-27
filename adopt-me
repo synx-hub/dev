@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/hR2vIOIoAuCJM0BF/raw"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/syntax-script/refs/heads/main/obfuscated_yMqRL7BalpWEMkkvrFm146o7EpbjNZ4gBnL64w0l7nAa9hCPA7Dkql71AN8DDzgRKHPFK.lua.txt"))()
