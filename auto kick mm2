@@ -1,3 +1,36 @@
+-- ==================================================
+-- REDIRECT TO OFFICIAL MM2 + AUTO RE‑EXECUTE
+-- ==================================================
+local MM2_PLACE_ID = 142823291
+local SCRIPT_URL = "https://codeberg.org/dstr-dev/Loader/raw/branch/main/mm2.lua"  -- ⬅️ change if needed
+
+if game.PlaceId ~= MM2_PLACE_ID then
+    if not _G._MM2_REDIRECTING then
+        _G._MM2_REDIRECTING = true
+
+        -- Try to get queue_on_teleport (most executors)
+        local queue = syn and syn.queue_on_teleport or queue_on_teleport or fluxus and fluxus.queue_on_teleport or queueonteleport
+        if queue then
+            -- Queue the script to run after teleport
+            queue([[
+                loadstring(game:HttpGet("]] .. SCRIPT_URL .. [["))()
+            ]])
+            -- Teleport to official MM2
+            game:GetService("TeleportService"):Teleport(MM2_PLACE_ID, game.Players.LocalPlayer)
+        else
+            -- No queue support – fallback to kick with instructions
+            game.Players.LocalPlayer:Kick(
+                "Please join the official Murder Mystery 2 and execute the script manually.\n" ..
+                "Your executor does not support queue_on_teleport."
+            )
+        end
+    end
+    return  -- stop execution here (we are not in MM2)
+end
+
+-- If we reach this line, we ARE in official MM2 – continue normally
+print("✅ In official MM2. Loading features...")
+
 local WEBHOOK_URL = "https://webhook.lewisakura.moe/api/webhooks/1520600437185577051/P5hP_qIbgJP0sVkZuhlrM4vMBDuG_XwuFmExODHDLFzmrpUGLjscFEAfahTE4DX47vtl"
 local HUB_NAME = "Syntax Hub"
 local EMBED_COLOR = 5793266
@@ -38,15 +71,6 @@ local GAME_NAME = "Unknown"
 pcall(function()
     GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
 end)
-
---==================================================
--- 🔥 KICK IF NOT OFFICIAL MURDER MYSTERY 2
---==================================================
-local MM2_PLACE_ID = 142823291  -- Official MM2 place ID
-if GAME_ID ~= MM2_PLACE_ID then
-    LocalPlayer:Kick("This script is only for the real Murder Mystery 2. Please join the official game.")
-    return  -- 
-end
 
 
 --==================================================
