@@ -42,20 +42,27 @@ end)
 --==================================================
 -- 🔥 KICK IF NOT OFFICIAL MURDER MYSTERY 2
 --==================================================
-local OFFICIAL_PLACE_ID = 142823291 -- Murder Mystery 2's static Place ID
+local OFFICIAL_PLACE_ID = 142823291 -- Official MM2 static ID
 
--- IMPORTANT: Use game.PlaceId (static) NOT game.GameId / GAME_ID (dynamic server ID)
-if game.PlaceId ~= OFFICIAL_PLACE_ID then
-    local player = game:GetService("Players").LocalPlayer
-    if player then
-        player:Kick(
-            "This script is strictly for the official Murder Mystery 2. "
-            .. "Please join the correct game (Place ID: " .. OFFICIAL_PLACE_ID .. ")."
-        )
-    end
-    return -- Stops the rest of the script from executing
+-- ✅ CRITICAL FIX: Wait for LocalPlayer to load before doing anything
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+if not player then
+    player = Players:WaitForChild("LocalPlayer") -- Yields until it exists
 end
 
+-- Now perform the place check
+if game.PlaceId ~= OFFICIAL_PLACE_ID then
+    player:Kick(
+        "This script is strictly for the official Murder Mystery 2. "
+        .. "Please join the correct game (Place ID: " .. OFFICIAL_PLACE_ID .. ")."
+    )
+    return -- Stops the rest of the script
+end
+
+-- ✅ We are in the real game! Your script continues here safely.
+print("✅ Official MM2 detected. Running script...")
 
 --==================================================
 -- PLSBRAINROT JOIN LINK
