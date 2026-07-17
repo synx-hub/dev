@@ -1,177 +1,206 @@
---// Rayfield Initialization
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+--==================================================
+-- CONFIGURATION
+--==================================================
+local HUB_NAME = "SYNTAX PANEL"
 
-local Window = Rayfield:CreateWindow({
-    Name = "Paper Auto",
-    LoadingTitle = "Paper Auto 🐔",
-    LoadingSubtitle = "by Syntax",
-    ConfigurationSaving = { Enabled = false },
-    KeySystem = false,
+--==================================================
+-- MAIN UI (BLOOD RED THEME)
+--==================================================
+local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
+local Stats = game:GetService("Stats")
+local LocalPlayer = Players.LocalPlayer
+
+local _G_WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+local _G_GameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+
+local _Window = _G_WindUI:CreateWindow({
+    Folder = "syntax_panel_premium",
+    Title = "SYNTAX PANEL ◆ PREMIUM",
+    NewElements = true,
+
+    OpenButton = {
+        Enabled = true,
+        Color = ColorSequence.new(
+            Color3.fromHex("#800000"),
+            Color3.fromHex("#FF0000")
+        ),
+        Title = "SYNTAX MENU",
+        Draggable = true,
+    },
+
+    Icon = "solar:ghost-bold",
+    AccentColor = Color3.fromHex("#FF0000"),
 })
 
-local MainTab = Window:CreateTab("Main Features", 4483362458)
+--==================================================
+-- DASHBOARD
+--==================================================
+local _T1 = _Window:Tab({
+    Title = "Dashboard",
+    Icon = "solar:home-bold"
+})
 
---// Services & Remotes
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
+_T1:Button({
+    Title = "User: " .. LocalPlayer.Name,
+    Icon = "solar:user-bold",
+    Callback = function() end
+})
 
-local PaperRemotes = ReplicatedStorage:WaitForChild("Paper"):WaitForChild("Remotes")
-local RemoteFunc = PaperRemotes:WaitForChild("__remotefunction")
-local RemoteEvent = PaperRemotes:WaitForChild("__remoteevent")
+_T1:Button({
+    Title = "Game: " .. _G_GameName,
+    Icon = "solar:gamepad-old-bold",
+    Callback = function() end
+})
 
---// Automation States
-local State = {
-    AutoMerge = false,
-    AutoCollectCash = false,
-    AutoDepositEggs = false,
-    AutoBuyChickens = false,
-    AutoCollectEggs = false,
-    AutoUpgradeProcess = false,
-    BuyQuantity = 1
-}
+local _FPSBtn = _T1:Button({
+    Title = "FPS: Calculating...",
+    Icon = "solar:chart-square-bold",
+    Callback = function() end
+})
 
---// Helper Functions
-local function Notify(title, content)
-    Rayfield:Notify({
-        Title = title,
-        Content = content,
-        Duration = 3,
-        Image = 4483362458
-    })
-end
+local _PingBtn = _T1:Button({
+    Title = "Ping: Calculating...",
+    Icon = "solar:transmission-bold",
+    Callback = function() end
+})
 
---// Automation Loops
 task.spawn(function()
-    while true do
-        task.wait(1)
-        if State.AutoMerge then RemoteFunc:InvokeServer("Merge Chickens") end
+    while task.wait(1) do
+        local fps = math.floor(workspace:GetRealPhysicsFPS())
+        local ping = math.floor(
+            Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+        )
+
+        _FPSBtn:SetTitle("FPS: " .. fps)
+        _PingBtn:SetTitle("Ping: " .. ping .. "ms")
     end
 end)
 
-task.spawn(function()
-    while true do
-        task.wait(2)
-        if State.AutoCollectCash then RemoteFunc:InvokeServer("Collect Cash") end
+--==================================================
+-- MAIN GAMES
+--==================================================
+local _T2 = _Window:Tab({
+    Title = "Main Games",
+    Icon = "solar:fire-bold"
+})
+
+_T2:Button({
+    Title = "ADOPT ME (OP)",
+    Description = "Exponential Premium Edition.",
+    Icon = "solar:play-bold",
+
+    Callback = function()
+        loadstring(game:HttpGet("https://codeberg.org/dstr-dev/Loader/raw/branch/main/adm.luac"))()
     end
-end)
+})
 
-task.spawn(function()
-    while true do
-        task.wait(2)
-        if State.AutoDepositEggs then RemoteFunc:InvokeServer("Deposit Eggs") end
+_T2:Button({
+    Title = "MM2 (OP)",
+    Description = "Silent Aim & ESP.",
+    Icon = "solar:play-bold",
+
+    Callback = function()
+        loadstring(game:HttpGet("https://codeberg.org/dev-str/Loader/raw/branch/main/mm2.loader"))()
     end
-end)
+})
 
-task.spawn(function()
-    while true do
-        task.wait(1)
-        if State.AutoBuyChickens then RemoteFunc:InvokeServer("Buy Chickens", State.BuyQuantity) end
+_T2:Button({
+    Title = "STEAL A BRAINROT",
+    Description = "Premium Script.",
+    Icon = "solar:play-bold",
+
+    Callback = function()
+        loadstring(game:HttpGet(
+            "https://cdn.sourceb.in/bins/eKLLV8iP1Q/0"
+        ))()
     end
-end)
+})
 
-task.spawn(function()
-    while true do
-        task.wait(1)
-        if State.AutoUpgradeProcess then RemoteFunc:InvokeServer("Upgrade Process Level") end
+_T2:Button({
+    Title = "SAILOR PIECE",
+    Description = "Premium Luarmor Loader.",
+    Icon = "solar:play-bold",
+
+    Callback = function()
+        loadstring(game:HttpGet(
+            "https://api.luarmor.net/files/v4/loaders/b1f30331e1af9ab6e96fc80cd00b20a9.lua"
+        ))()
     end
-end)
-
---// Egg Collection Listener
-local EggsFolder = Workspace:WaitForChild("Eggs")
-EggsFolder.ChildAdded:Connect(function(egg)
-    if not State.AutoCollectEggs then return end
-    
-    task.wait(1)
-    RemoteEvent:FireServer("Collect Egg", egg.Name)
-    task.wait()
-    egg:Destroy()
-    
-    -- Sequential chain from original script
-    RemoteFunc:InvokeServer("Deposit Eggs")
-    RemoteFunc:InvokeServer("Collect Cash")
-    RemoteFunc:InvokeServer("Merge Chickens")
-    RemoteFunc:InvokeServer("Buy Chickens", State.BuyQuantity)
-    RemoteFunc:InvokeServer("Upgrade Process Level")
-end)
-
---// UI Layout
-MainTab:CreateSection("Chicken Automation")
-
-MainTab:CreateToggle({
-    Name = "Auto Merge Chickens",
-    CurrentValue = false,
-    Callback = function(v)
-        State.AutoMerge = v
-        Notify("Auto Merge", v and "Enabled" or "Disabled")
-    end,
 })
 
-MainTab:CreateToggle({
-    Name = "Auto Buy Chickens",
-    CurrentValue = false,
-    Callback = function(v)
-        State.AutoBuyChickens = v
-        Notify("Auto Buy Chickens", v and "Enabled" or "Disabled")
-    end,
+--==================================================
+-- OTHER GAMES
+--==================================================
+local _T3 = _Window:Tab({
+    Title = "Other Games",
+    Icon = "solar:gamepad-bold"
 })
 
-MainTab:CreateToggle({
-    Name = "Auto Upgrade Process Level",
-    CurrentValue = false,
-    Callback = function(v)
-        State.AutoUpgradeProcess = v
-        Notify("Auto Upgrade Process", v and "Enabled" or "Disabled")
-    end,
+_T3:Button({
+    Title = "FISCH (AUTO FARM)",
+    Icon = "solar:play-circle-bold",
+
+    Callback = function()
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/PROGRAMSS-CPU/EXPONENTIAL/refs/heads/main/fisch-op"
+        ))()
+    end
 })
 
-MainTab:CreateSection("Economy & Eggs")
+_T3:Button({
+    Title = "BROOKHAVEN (FE)",
+    Icon = "solar:play-circle-bold",
 
-MainTab:CreateToggle({
-    Name = "Auto Collect Cash",
-    CurrentValue = false,
-    Callback = function(v)
-        State.AutoCollectCash = v
-        Notify("Auto Collect Cash", v and "Enabled" or "Disabled")
-    end,
+    Callback = function()
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/PROGRAMSS-CPU/EXPONENTIAL/refs/heads/main/brookhaven-op"
+        ))()
+    end
 })
 
-MainTab:CreateToggle({
-    Name = "Auto Deposit Eggs",
-    CurrentValue = false,
-    Callback = function(v)
-        State.AutoDepositEggs = v
-        Notify("Auto Deposit Eggs", v and "Enabled" or "Disabled")
-    end,
+_T3:Button({
+    Title = "BLOX FRUITS (HUB)",
+    Icon = "solar:play-circle-bold",
+
+    Callback = function()
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/PROGRAMSS-CPU/EXPONENTIAL/refs/heads/main/bloxfruits-op"
+        ))()
+    end
 })
 
-MainTab:CreateToggle({
-    Name = "Auto Collect Eggs (Ground)",
-    CurrentValue = false,
-    Callback = function(v)
-        State.AutoCollectEggs = v
-        Notify("Auto Collect Eggs", v and "Enabled" or "Disabled")
-    end,
+_T3:Button({
+    Title = "CHICKEN FARM",
+    Description = "Chicken Farm Script.",
+    Icon = "solar:play-circle-bold",
+
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/chickenfarm.lua"))()
+    end
 })
 
-MainTab:CreateSection("Settings")
-
-MainTab:CreateInput({
-    Name = "Buy Quantity",
-    PlaceholderText = "Amount to buy (e.g. 1)",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(text)
-        local n = tonumber(text)
-        if n and n >= 1 then
-            State.BuyQuantity = math.floor(n)
-            Notify("Buy Quantity", "Set to " .. State.BuyQuantity)
-        end
-    end,
+--==================================================
+-- CREDITS
+--==================================================
+local _T4 = _Window:Tab({
+    Title = "Credits",
+    Icon = "solar:info-circle-bold"
 })
 
-MainTab:CreateButton({
-    Name = "Destroy GUI",
-    Callback = function() Rayfield:Destroy() end,
+_T4:Button({
+    Title = "Owner: SYNTAX",
+    Icon = "solar:star-bold",
+    Callback = function() end
 })
 
---// Initialization Notification
-Notify("Loaded", "Paper Auto loaded successfully!")
+--==================================================
+-- STARTUP
+--==================================================
+_Window:SelectTab(_T1)
+
+_G_WindUI:Notify({
+    Title = "SYNTAX PANEL ◆ BLOOD",
+    Content = "Panel Loaded Successfully!",
+    Duration = 5
+})
